@@ -1,79 +1,76 @@
 // script.js
 document.addEventListener('DOMContentLoaded', function() {
-    const galaxyContainer = document.getElementById('galaxy');
-    const numberOfStars = 200;
+    const canvas = document.getElementById('galaxy');
+    const ctx = canvas.getContext('2d');
+    const numberOfStars = 500;
     const numberOfArms = 4;
     const armLength = 300;
 
+    // Set canvas size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
     // Create the galactic core
-    const core = document.createElement('div');
-    core.className = 'core';
-    galaxyContainer.appendChild(core);
+    function drawCore() {
+        const gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 10, canvas.width / 2, canvas.height / 2, 50);
+        gradient.addColorStop(0, '#FFD700');
+        gradient.addColorStop(1, '#FF8C00');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
     // Create stars
-    for (let i = 0; i < numberOfStars; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        const size = Math.random() * 2 + 0.5;
-        star.style.width = `${size}px`;
-        star.style.height = `${size}px`;
+    function createStars() {
+        for (let i = 0; i < numberOfStars; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const size = Math.random() * 2 + 0.5;
+            const opacity = Math.random() * 0.6 + 0.4;
 
-        // Random position within the container
-        const x = Math.random() * window.innerWidth - window.innerWidth / 2;
-        const y = Math.random() * window.innerHeight - window.innerHeight / 2;
-        star.style.left = `${x}px`;
-        star.style.top = `${y}px`;
-
-        // Random animation delay for twinkling effect
-        star.style.animationDelay = `${Math.random() * 2}s`;
-
-        galaxyContainer.appendChild(star);
+            ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 
     // Create spiral arms
-    for (let arm = 0; arm < numberOfArms; arm++) {
-        const angleIncrement = (Math.PI * 2) / numberOfArms;
-        const armAngle = arm * angleIncrement;
+    function createSpiralArms() {
+        for (let arm = 0; arm < numberOfArms; arm++) {
+            const angleIncrement = (Math.PI * 2) / numberOfArms;
+            const armAngle = arm * angleIncrement;
 
-        for (let i = 0; i < armLength; i++) {
-            const armSegment = document.createElement('div');
-            armSegment.className = 'arm';
-            const size = Math.random() * 3 + 1;
-            armSegment.style.width = `${size}px`;
-            armSegment.style.height = `${size}px`;
+            for (let i = 0; i < armLength; i++) {
+                const radius = i * 2;
+                const x = canvas.width / 2 + radius * Math.cos(armAngle + i * 0.1);
+                const y = canvas.height / 2 + radius * Math.sin(armAngle + i * 0.1);
+                const size = Math.random() * 3 + 1;
+                const opacity = Math.random() * 0.5 + 0.5;
 
-            // Spiral arm position
-            const radius = i * 2;
-            const x = radius * Math.cos(armAngle + i * 0.1);
-            const y = radius * Math.sin(armAngle + i * 0.1);
-            armSegment.style.left = `${x}px`;
-            armSegment.style.top = `${y}px`;
-
-            galaxyContainer.appendChild(armSegment);
+                ctx.fillStyle = `rgba(65, 105, 225, ${opacity})`;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
     }
 
     // Animate the galaxy
     function animateGalaxy() {
-        const stars = document.querySelectorAll('.star');
-        const arms = document.querySelectorAll('.arm');
-
-        stars.forEach(star => {
-            const x = parseFloat(star.style.left) + (Math.random() - 0.5) * 0.5;
-            const y = parseFloat(star.style.top) + (Math.random() - 0.5) * 0.5;
-            star.style.left = `${x}px`;
-            star.style.top = `${y}px`;
-        });
-
-        arms.forEach(arm => {
-            const x = parseFloat(arm.style.left) + (Math.random() - 0.5) * 0.2;
-            const y = parseFloat(arm.style.top) + (Math.random() - 0.5) * 0.2;
-            arm.style.left = `${x}px`;
-            arm.style.top = `${y}px`;
-        });
-
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawCore();
+        createStars();
+        createSpiralArms();
         requestAnimationFrame(animateGalaxy);
     }
 
     animateGalaxy();
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
 });
