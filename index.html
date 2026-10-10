@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عنقاء من نقاط نارية متجانسه</title>
+    <title>عنقاء من نقاط ناريه متجانسه</title>
     <style>
         body, html {
             margin: 0;
@@ -55,24 +55,23 @@
             mouse.targetY = e.clientY;
         });
 
-        // أنواع النقاط (جسم، ريش، نار)
+        // أنواع النقاط
         const PARTICLE_TYPES = {
             BODY: 0,
             FEATHER: 1,
             FIRE: 2
         };
 
-        // نظام النقاط (Particles)
+        // نظام النقاط
         class PhoenixParticle {
             constructor(x, y, type) {
                 this.x = x;
                 this.y = y;
-                this.baseX = x; // موضع قاعدة (للتحريك)
+                this.baseX = x;
                 this.baseY = y;
                 this.type = type;
                 this.size = this.getSize();
                 this.color = this.getColor();
-                this.speed = (Math.random() - 0.5) * 0.5;
                 this.angle = Math.random() * Math.PI * 2;
                 this.frequency = Math.random() * 0.1 + 0.05;
                 this.amplitude = Math.random() * 5 + 2;
@@ -121,13 +120,11 @@
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.rotation);
 
-                // تأثير توهج
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = this.color;
                 ctx.globalAlpha = 0.8;
                 ctx.fillStyle = this.color;
 
-                // شكل النقطة
                 if (this.type === PARTICLE_TYPES.FEATHER) {
                     // ريش (مثلث)
                     ctx.beginPath();
@@ -145,7 +142,7 @@
             }
         }
 
-        // جسم العنقاء (مجموعة من النقاط)
+        // جسم العنقاء
         let phoenix = {
             x: width / 2,
             y: height / 2,
@@ -154,6 +151,9 @@
             wingFlapSpeed: 0.1,
             lastFireTime: 0
         };
+
+        // جسيمات نار إضافية
+        let fireParticles = [];
 
         // إنشاء شكل العنقاء من نقاط
         function createPhoenix() {
@@ -172,39 +172,4 @@
 
             // 2. أجنحة (نقاط متحركة)
             for (let side = -1; side <= 1; side += 2) {
-                for (let i = 0; i < 60; i++) {
-                    const wingX = side * (50 + Math.random() * 100);
-                    const wingY = -20 + Math.random() * 40;
-                    phoenix.particles.push(new PhoenixParticle(
-                        phoenix.x + wingX,
-                        phoenix.y + wingY,
-                        PARTICLE_TYPES.FEATHER
-                    ));
-                }
-            }
-
-            // 3. ذيل (نقاط طويلة)
-            for (let i = 0; i < 40; i++) {
-                const tailX = -30 - Math.random() * 80;
-                const tailY = -10 + Math.random() * 20;
-                phoenix.particles.push(new PhoenixParticle(
-                    phoenix.x + tailX,
-                    phoenix.y + tailY,
-                    PARTICLE_TYPES.FEATHER
-                ));
-            }
-        }
-
-        // جسيمات نار إضافية (منتثرة)
-        let fireParticles = [];
-
-        // تحديث حركة العنقاء
-        function updatePhoenix() {
-            phoenix.x += (mouse.targetX - phoenix.x) * 0.05;
-            phoenix.y += (mouse.targetY - phoenix.y) * 0.05;
-            phoenix.wingFlap += phoenix.wingFlapSpeed;
-
-            // توليد نيران من الريش كل فتره
-            if (Date.now() - phoenix.lastFireTime > 100) {
-                for (let i = 0; i < 3; i++) {
-                    const feather = phoenix.particles.find(p => p.type === PARTICLE_TYPES
+                for (let i = 0; i < 60
