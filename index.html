@@ -3,91 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animated Milky Way Galaxy</title>
-    <style>
-        body {
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-        #galaxy {
-            width: 80%;
-            max-width: 600px;
-            animation: rotate 20s linear infinite;
-        }
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        .star {
-            fill: white;
-            opacity: 0.8;
-            animation: twinkle 2s infinite alternate;
-        }
-        @keyframes twinkle {
-            from {
-                opacity: 0.2;
-            }
-            to {
-                opacity: 0.8;
-            }
-        }
-        .core {
-            fill: #FFD700; /* Gold for the galactic core */
-        }
-        .arm {
-            stroke: #4169E1; /* Royal blue for spiral arms */
-            stroke-width: 2;
-            fill: none;
-        }
-        .moving-star {
-            animation: moveStar 5s linear infinite;
-        }
-        @keyframes moveStar {
-            0% {
-                transform: translate(0, 0);
-            }
-            50% {
-                transform: translate(10px, 10px);
-            }
-            100% {
-                transform: translate(0, 0);
-            }
-        }
-    </style>
+    <title>Realistic Milky Way Galaxy</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <svg id="galaxy" viewBox="-200 -200 400 400">
-        <!-- Galactic Core -->
-        <circle class="core" cx="0" cy="0" r="20" />
-
-        <!-- Spiral Arms -->
-        <path class="arm" d="M20,0 Q40,-40 80,-20 T120,0 T160,20" />
-        <path class="arm" d="M20,0 Q40,40 80,20 T120,0 T160,-20" />
-        <path class="arm" d="M-20,0 Q-40,-40 -80,-20 T-120,0 T-160,20" />
-        <path class="arm" d="M-20,0 Q-40,40 -80,20 T-120,0 T-160,-20" />
-
-        <!-- Random Stars -->
-        <circle class="star" cx="100" cy="-50" r="1" />
-        <circle class="star" cx="-120" cy="30" r="1.5" />
-        <circle class="star" cx="50" cy="100" r="0.8" />
-        <circle class="star" cx="-80" cy="-90" r="1.2" />
-        <circle class="star" cx="150" cy="20" r="0.5" />
-
-        <!-- Moving Stars -->
-        <circle class="star moving-star" cx="80" cy="-30" r="1" />
-        <circle class="star moving-star" cx="-60" cy="70" r="1.5" />
-        <circle class="star moving-star" cx="30" cy="80" r="0.8" />
-        <circle class="star moving-star" cx="-50" cy="-70" r="1.2" />
-        <circle class="star moving-star" cx="100" cy="10" r="0.5" />
-    </svg>
+    <div id="galaxy-container">
+        <div id="galaxy"></div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
