@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Milky Way Galaxy</title>
+    <title>Animated Milky Way Galaxy</title>
     <style>
         body {
             background-color: #000;
@@ -17,10 +17,28 @@
         #galaxy {
             width: 80%;
             max-width: 600px;
+            animation: rotate 20s linear infinite;
+        }
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
         }
         .star {
             fill: white;
             opacity: 0.8;
+            animation: twinkle 2s infinite alternate;
+        }
+        @keyframes twinkle {
+            from {
+                opacity: 0.2;
+            }
+            to {
+                opacity: 0.8;
+            }
         }
         .core {
             fill: #FFD700; /* Gold for the galactic core */
@@ -29,6 +47,20 @@
             stroke: #4169E1; /* Royal blue for spiral arms */
             stroke-width: 2;
             fill: none;
+        }
+        .moving-star {
+            animation: moveStar 5s linear infinite;
+        }
+        @keyframes moveStar {
+            0% {
+                transform: translate(0, 0);
+            }
+            50% {
+                transform: translate(10px, 10px);
+            }
+            100% {
+                transform: translate(0, 0);
+            }
         }
     </style>
 </head>
@@ -49,7 +81,13 @@
         <circle class="star" cx="50" cy="100" r="0.8" />
         <circle class="star" cx="-80" cy="-90" r="1.2" />
         <circle class="star" cx="150" cy="20" r="0.5" />
-        <!-- Add more stars as needed -->
+
+        <!-- Moving Stars -->
+        <circle class="star moving-star" cx="80" cy="-30" r="1" />
+        <circle class="star moving-star" cx="-60" cy="70" r="1.5" />
+        <circle class="star moving-star" cx="30" cy="80" r="0.8" />
+        <circle class="star moving-star" cx="-50" cy="-70" r="1.2" />
+        <circle class="star moving-star" cx="100" cy="10" r="0.5" />
     </svg>
 </body>
 </html>
