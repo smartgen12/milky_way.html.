@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عنقاء ناري واقعي - Phoenix Generative Art</title>
+    <title>عنقاء ناري واقعي</title>
     <style>
         body, html {
             margin: 0;
@@ -12,78 +12,71 @@
             height: 100%;
             overflow: hidden;
             background-color: #000;
-            font-family: Tahoma, sans-serif;
         }
-        canvas {
-            display: block;
-        }
+        canvas { display: block; }
         .info {
             position: absolute;
             bottom: 20px;
             right: 20px;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.9);
             background: rgba(0, 0, 0, 0.7);
             padding: 12px 18px;
             border-radius: 8px;
-            pointer-events: none;
             font-size: 14px;
-            border: 1px solid rgba(255, 120, 0, 0.4);
-            box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);
+            border: 1px solid rgba(255, 120, 0, 0.5);
         }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
-    <div class="info">حرك الماوس وشاهد العنقاء الناري يتبعك مع ريش مشتعل!</div>
+    <div class="info">حرك الماوس وشاهد العنقاء الناري!</div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
+        // إعدادات الشاشة
         let width = canvas.width = window.innerWidth;
         let height = canvas.height = window.innerHeight;
-
         window.addEventListener('resize', () => {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
         });
 
+        // متتبع الماوس
         const mouse = {
             x: width / 2,
             y: height / 2,
             targetX: width / 2,
             targetY: height / 2
         };
-
         window.addEventListener('mousemove', (e) => {
             mouse.targetX = e.clientX;
             mouse.targetY = e.clientY;
         });
 
-        // نظام جسيمات نار محسّن (مع تأثيرات ريش مشتعل)
+        // نظام جسيمات النار (مع ريش مشتعل)
         class FireParticle {
-            constructor(x, y, isEmber = false, isFeatherFire = false) {
+            constructor(x, y, isFeather = false) {
                 this.x = x;
                 this.y = y;
-                this.isEmber = isEmber;
-                this.isFeatherFire = isFeatherFire;
-                this.size = isEmber ? Math.random() * 2 + 1 : (isFeatherFire ? Math.random() * 5 + 2 : Math.random() * 4 + 1);
-                this.speedX = (Math.random() - 0.5) * (isFeatherFire ? 8 : 4);
-                this.speedY = isEmber ? Math.random() * -3 - 1 : (isFeatherFire ? Math.random() * -5 - 2 : Math.random() * -2 - 0.5);
+                this.isFeather = isFeather;
+                this.size = isFeather ? Math.random() * 6 + 3 : Math.random() * 3 + 1;
+                this.speedX = (Math.random() - 0.5) * (isFeather ? 6 : 3);
+                this.speedY = Math.random() * -4 - 2;
                 this.life = 1;
-                this.decay = Math.random() * 0.03 + 0.01;
-                this.color = isFeatherFire ?
-                    (Math.random() > 0.5 ? '#ff0000' : '#ff4500') :
-                    (Math.random() > 0.4 ? '#ff3300' : (Math.random() > 0.5 ? '#ff9900' : '#ffff66'));
+                this.decay = Math.random() * 0.02 + 0.01;
+                this.color = isFeather ?
+                    ['#ff4500', '#ff6600', '#ff8c00'][Math.floor(Math.random() * 3)] :
+                    ['#ff0000', '#ff3300', '#ff6600'][Math.floor(Math.random() * 3)];
                 this.rotation = Math.random() * Math.PI * 2;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.2;
             }
 
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
                 this.life -= this.decay;
-                if (this.size > 0.3) this.size -= 0.1;
                 this.rotation += this.rotationSpeed;
             }
 
@@ -94,103 +87,127 @@
                 ctx.globalAlpha = this.life;
                 ctx.fillStyle = this.color;
 
-                if (this.isFeatherFire) {
-                    // شكل ريش مشتعل (مثلث صغير)
+                if (this.isFeather) {
+                    // ريش مشتعل (شكل مثلث)
                     ctx.beginPath();
-                    ctx.moveTo(0, -this.size / 2);
-                    ctx.lineTo(-this.size / 2, this.size / 2);
-                    ctx.lineTo(this.size / 2, this.size / 2);
+                    ctx.moveTo(0, -this.size);
+                    ctx.lineTo(-this.size/2, this.size);
+                    ctx.lineTo(this.size/2, this.size);
                     ctx.closePath();
-                    ctx.fill();
                 } else {
-                    // شكل دائري للنار العادية
+                    // نار عادية (دائرة)
                     ctx.beginPath();
-                    ctx.arc(0, 0, Math.max(0, this.size), 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
                 }
-
-                // تأثير توهج (Glow)
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = this.color;
+                ctx.fill();
                 ctx.restore();
             }
         }
 
+        // جسيمات النار
         let particles = [];
-        let time = 0;
 
-        // جسم العنقاء (مع تفاصيل الجناحين والذيل)
-        let phoenix = {
+        // جسم العنقاء
+        const phoenix = {
             x: width / 2,
             y: height / 2,
-            bodyWidth: 80,
-            bodyHeight: 120,
-            wingSpan: 200,
-            tailLength: 150,
+            bodyWidth: 60,
+            bodyHeight: 100,
+            wingSpan: 180,
+            tailLength: 120,
             angle: 0,
-            flapAmplitude: 0,
-            flapSpeed: 0.1,
-            lastFlapTime: 0
+            flapTime: 0,
+            flapSpeed: 0.2
         };
 
-        // تحديث رفرفة الأجنحة
-        function updateWings() {
-            phoenix.angle = (mouse.targetX - phoenix.x) * 0.001;
-            phoenix.flapAmplitude = Math.sin(time * phoenix.flapSpeed) * 30;
+        // تحديث موقع العنقاء
+        function updatePhoenix() {
+            phoenix.x += (mouse.targetX - phoenix.x) * 0.05;
+            phoenix.y += (mouse.targetY - phoenix.y) * 0.05;
+            phoenix.angle = (mouse.targetX - phoenix.x) * 0.002;
+            phoenix.flapTime += phoenix.flapSpeed;
         }
 
-        // رسم جسم العنقاء
+        // رسم العنقاء
         function drawPhoenix() {
             ctx.save();
             ctx.translate(phoenix.x, phoenix.y);
             ctx.rotate(phoenix.angle);
 
-            // 1. جسم العنقاء (تدرج لوني)
-            let bodyGradient = ctx.createLinearGradient(-phoenix.bodyWidth / 2, -phoenix.bodyHeight / 2, phoenix.bodyWidth / 2, phoenix.bodyHeight / 2);
+            // جسم العنقاء (تدرج لوني)
+            const bodyGradient = ctx.createLinearGradient(
+                -phoenix.bodyWidth/2, -phoenix.bodyHeight/2,
+                phoenix.bodyWidth/2, phoenix.bodyHeight/2
+            );
             bodyGradient.addColorStop(0, '#ff6600');
             bodyGradient.addColorStop(0.5, '#ff3300');
             bodyGradient.addColorStop(1, '#cc0000');
 
+            // الجسم الرئيسي
             ctx.fillStyle = bodyGradient;
             ctx.beginPath();
-            ctx.ellipse(0, 0, phoenix.bodyWidth / 2, phoenix.bodyHeight / 2, 0, 0, Math.PI * 2);
+            ctx.ellipse(0, 0, phoenix.bodyWidth/2, phoenix.bodyHeight/2, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // 2. رأس العنقاء
+            // رأس العنقاء
             ctx.fillStyle = '#ff0000';
             ctx.beginPath();
-            ctx.ellipse(0, -phoenix.bodyHeight / 2 - 20, 15, 25, 0, 0, Math.PI * 2);
+            ctx.ellipse(0, -phoenix.bodyHeight/2 - 20, 15, 25, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // 3. عين العنقاء
+            // عين
             ctx.fillStyle = '#ffff00';
             ctx.beginPath();
-            ctx.arc(5, -phoenix.bodyHeight / 2 - 20, 3, 0, Math.PI * 2);
+            ctx.arc(5, -phoenix.bodyHeight/2 - 20, 3, 0, Math.PI * 2);
             ctx.fill();
 
-            // 4. جناحين مع رفرفة
-            let wingGradient = ctx.createLinearGradient(0, 0, phoenix.wingSpan / 2, 0);
+            // جناحين مع رفرفة
+            const wingGradient = ctx.createLinearGradient(0, 0, phoenix.wingSpan/2, 0);
             wingGradient.addColorStop(0, '#ff9900');
-            wingGradient.addColorStop(0.5, '#ff3300');
-            wingGradient.addColorStop(1, '#ff0000');
+            wingGradient.addColorStop(1, '#ff3300');
+
+            const flapOffset = Math.sin(phoenix.flapTime) * 30;
 
             for (let side = -1; side <= 1; side += 2) {
                 ctx.save();
                 ctx.scale(side, 1);
-                ctx.strokeStyle = wingGradient;
-                ctx.lineWidth = 10;
 
-                // منحنى الجناح مع رفرفة
+                // رسم الجناح
+                ctx.strokeStyle = wingGradient;
+                ctx.lineWidth = 12;
                 ctx.beginPath();
-                ctx.moveTo(phoenix.bodyWidth / 2, 0);
+                ctx.moveTo(phoenix.bodyWidth/2, 0);
                 ctx.bezierCurveTo(
-                    phoenix.wingSpan / 4, -phoenix.flapAmplitude - 30,
-                    phoenix.wingSpan / 2, phoenix.flapAmplitude + 20,
-                    phoenix.wingSpan / 2, 0
+                    phoenix.wingSpan/4, -flapOffset - 20,
+                    phoenix.wingSpan/2, flapOffset + 10,
+                    phoenix.wingSpan/2, 0
                 );
                 ctx.stroke();
 
                 // توليد نيران من الريش
-                if (Math.random() < 0.3) {
+                if (Math.random() < 0.2) {
                     particles.push(new FireParticle(
-                        phoenix.x +
+                        phoenix.x + side * (phoenix.wingSpan/2 * Math.random()),
+                        phoenix.y + (Math.random() * 40 - 20),
+                        true // isFeather
+                    ));
+                }
+                ctx.restore();
+            }
+
+            // ذيل العنقاء
+            const tailGradient = ctx.createLinearGradient(0, 0, -phoenix.tailLength, 0);
+            tailGradient.addColorStop(0, '#ff6600');
+            tailGradient.addColorStop(1, '#ff0000');
+
+            ctx.strokeStyle = tailGradient;
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(-phoenix.bodyWidth/2, 0);
+            ctx.quadraticCurveTo(
+                -phoenix.tailLength/2, -Math.sin(phoenix.flapTime * 0.5) * 20,
+                -phoenix.tailLength, 0
+            );
+            ctx.stroke();
+
+            //
