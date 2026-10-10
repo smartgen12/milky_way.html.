@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عنقاء من نقاط ناريه متجانسه</title>
+    <title>Particle Phoenix - Firebird Animation</title>
     <style>
         body, html {
             margin: 0;
@@ -24,50 +24,53 @@
             border-radius: 8px;
             font-size: 14px;
             border: 1px solid rgba(255, 120, 0, 0.5);
+            font-family: Arial, sans-serif;
         }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
-    <div class="info">حرك الماوس وشاهد العنقاء الناري من نقاط متجانسه!</div>
+    <div class="info">Move your mouse to see the fire phoenix!</div>
 
     <script>
+        // Canvas setup
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-
-        // إعدادات الشاشة
         let width = canvas.width = window.innerWidth;
         let height = canvas.height = window.innerHeight;
+
+        // Handle window resize
         window.addEventListener('resize', () => {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
         });
 
-        // متتبع الماوس
+        // Mouse tracker
         const mouse = {
             x: width / 2,
             y: height / 2,
             targetX: width / 2,
             targetY: height / 2
         };
+
         window.addEventListener('mousemove', (e) => {
             mouse.targetX = e.clientX;
             mouse.targetY = e.clientY;
         });
 
-        // أنواع النقاط
+        // Particle types
         const PARTICLE_TYPES = {
             BODY: 0,
             FEATHER: 1,
             FIRE: 2
         };
 
-        // نظام النقاط
+        // Phoenix particle class
         class PhoenixParticle {
             constructor(x, y, type) {
                 this.x = x;
                 this.y = y;
-                this.baseX = x;
+                this.baseX = x; // Base position for movement
                 this.baseY = y;
                 this.type = type;
                 this.size = this.getSize();
@@ -77,6 +80,8 @@
                 this.amplitude = Math.random() * 5 + 2;
                 this.rotation = 0;
                 this.rotationSpeed = (Math.random() - 0.5) * 0.02;
+                this.life = 1;
+                this.decay = Math.random() * 0.01 + 0.005;
             }
 
             getSize() {
@@ -101,17 +106,22 @@
             }
 
             update(phoenix) {
-                // تحريك النقطة مع جسم العنقاء
+                // Smooth follow to phoenix position
                 this.baseX = phoenix.x + (this.baseX - phoenix.x) * 0.9;
                 this.baseY = phoenix.y + (this.baseY - phoenix.y) * 0.9;
 
-                // حركة طبيعيه للنقطة (تمايل)
+                // Natural swaying motion
                 this.x = this.baseX + Math.sin(this.angle + Date.now() * this.frequency) * this.amplitude;
                 this.y = this.baseY + Math.cos(this.angle * 0.5 + Date.now() * this.frequency) * this.amplitude * 0.5;
 
-                // دوران (للريش)
+                // Rotation for feathers
                 if (this.type === PARTICLE_TYPES.FEATHER) {
                     this.rotation += this.rotationSpeed;
+                }
+
+                // Fire particles fade out
+                if (this.type === PARTICLE_TYPES.FIRE) {
+                    this.life -= this.decay;
                 }
             }
 
@@ -120,46 +130,53 @@
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.rotation);
 
+                // Glow effect
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = this.color;
-                ctx.globalAlpha = 0.8;
+                ctx.globalAlpha = this.type === PARTICLE_TYPES.FIRE ? this.life : 0.8;
                 ctx.fillStyle = this.color;
 
+                // Draw shape based on type
                 if (this.type === PARTICLE_TYPES.FEATHER) {
-                    // ريش (مثلث)
+                    // Feather (triangle)
                     ctx.beginPath();
                     ctx.moveTo(0, -this.size);
                     ctx.lineTo(-this.size/2, this.size);
                     ctx.lineTo(this.size/2, this.size);
                     ctx.closePath();
                 } else {
-                    // جسم أو نار (دائرة)
+                    // Body or fire (circle)
                     ctx.beginPath();
                     ctx.arc(0, 0, this.size, 0, Math.PI * 2);
                 }
                 ctx.fill();
                 ctx.restore();
             }
+
+            isAlive() {
+                return this.type !== PARTICLE_TYPES.FIRE || this.life > 0;
+            }
         }
 
-        // جسم العنقاء
-        let phoenix = {
+        // Phoenix object
+        const phoenix = {
             x: width / 2,
             y: height / 2,
             particles: [],
             wingFlap: 0,
             wingFlapSpeed: 0.1,
-            lastFireTime: 0
+            lastFireTime: 0,
+            fireInterval: 100 // ms between fire emissions
         };
 
-        // جسيمات نار إضافية
+        // Additional fire particles
         let fireParticles = [];
 
-        // إنشاء شكل العنقاء من نقاط
+        // Create phoenix shape from particles
         function createPhoenix() {
             phoenix.particles = [];
 
-            // 1. جسم العنقاء (نقاط مركزية)
+            // 1. Body particles (central cluster)
             for (let i = 0; i < 80; i++) {
                 const angle = Math.random() * Math.PI * 2;
                 const distance = Math.random() * 40;
@@ -170,6 +187,40 @@
                 ));
             }
 
-            // 2. أجنحة (نقاط متحركة)
+            // 2. Wings (moving particles)
             for (let side = -1; side <= 1; side += 2) {
-                for (let i = 0; i < 60
+                for (let i = 0; i < 60; i++) {
+                    const wingX = side * (50 + Math.random() * 100);
+                    const wingY = -20 + Math.random() * 40;
+                    phoenix.particles.push(new PhoenixParticle(
+                        phoenix.x + wingX,
+                        phoenix.y + wingY,
+                        PARTICLE_TYPES.FEATHER
+                    ));
+                }
+            }
+
+            // 3. Tail (long particles)
+            for (let i = 0; i < 40; i++) {
+                const tailX = -30 - Math.random() * 80;
+                const tailY = -10 + Math.random() * 20;
+                phoenix.particles.push(new PhoenixParticle(
+                    phoenix.x + tailX,
+                    phoenix.y + tailY,
+                    PARTICLE_TYPES.FEATHER
+                ));
+            }
+        }
+
+        // Main animation loop
+        function animate() {
+            // Clear canvas with semi-transparent black for motion blur effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, width, height);
+
+            // Update phoenix position
+            phoenix.x += (mouse.targetX - phoenix.x) * 0.05;
+            phoenix.y += (mouse.targetY - phoenix.y) * 0.05;
+            phoenix.wingFlap += phoenix.wingFlapSpeed;
+
+            // Generate fire particles from feathers
